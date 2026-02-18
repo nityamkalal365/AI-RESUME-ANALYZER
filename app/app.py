@@ -1,6 +1,9 @@
 import streamlit as st
 import pickle
 import re
+import nltk
+nltk.download("stopwords")
+
 from nltk.corpus import stopwords
 
 # Load saved model and TF-IDF
