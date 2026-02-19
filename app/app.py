@@ -2,6 +2,8 @@ import streamlit as st
 import pickle
 import re
 import nltk
+import pandas as pd
+
 nltk.download("stopwords")
 
 from nltk.corpus import stopwords
@@ -158,9 +160,7 @@ def predict_category_with_confidence(resume_text):
     return category, round(confidence, 2)
 
 
-def extract_skills(text):
-    text = text.lower()
-    return list(set([skill for skill in skills_list if skill in text]))
+
 
 
 def extract_skills_from_jd(jd_text: str) -> dict:
@@ -262,13 +262,38 @@ if st.button("Analyze Resume"):
             st.info("ℹ️ Add a job description to compute ATS match score.")
         
         else:
-            score, r_skills, j_skills = ats_score(resume_text, job_desc)
-
-            st.subheader("🧠 Extracted Resume Skills")
-            st.write(r_skills)
-
-            st.subheader("📌 Job Description Skills")
-            st.write(j_skills)
-
+           
+            score, resume_counts, jd_counts, matched_detail = ats_score_with_counts(resume_text, job_desc)
+            
+            # Resume skills table
+            st.subheader("🧠 Extracted Resume Skills (skill : count)")
+            if resume_counts:
+                df_resume = pd.DataFrame(
+                    sorted(resume_counts.items(), key=lambda x: -x[1]),
+                    columns=["Skill", "Count"]
+                )
+                st.table(df_resume)
+            else:
+                st.write([])
+            
+            # JD skills table
+            st.subheader("📌 Job Description Skills (required → found)")
+            if jd_counts:
+                jd_rows = []
+                for skill, jd_c in jd_counts.items():
+                    rd = matched_detail.get(skill, {})
+                    jd_rows.append({
+                        "Skill": skill,
+                        "Required in JD": jd_c,
+                        "Found in Resume": rd.get("resume_count", 0),
+                        "Matched": rd.get("matched", False)
+                    })
+                df_jd = pd.DataFrame(jd_rows)
+                st.table(df_jd)
+            else:
+                st.write([])
+            
+            # ATS score
             st.subheader("📊 ATS Match Score")
             st.info(f"{score}% match with job description")
+
