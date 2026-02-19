@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 streamlit
 scikit-learn
 pandas
 numpy
 nltk
 sentence-transformers
+=======
+streamlit
+scikit-learn
+pandas
+numpy
+nltk
+sentence-transformers
+>>>>>>> 9c468de5ced1e3811997be197bbeacfdf4491781
